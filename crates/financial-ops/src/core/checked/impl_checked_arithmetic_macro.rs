@@ -34,27 +34,27 @@
 #[macro_export]
 macro_rules! impl_checked_arithmetic {
     ($($t:ty)*) => ($(
-        impl crate::core::CheckedAdd for $t {
+        impl $crate::core::CheckedAdd for $t {
             fn checked_add(&self, v: &Self) -> Option<Self> {
                 <$t>::checked_add(*self, *v)
             }
         }
-        impl crate::core::CheckedSub for $t {
+        impl $crate::core::CheckedSub for $t {
             fn checked_sub(&self, v: &Self) -> Option<Self> {
                 <$t>::checked_sub(*self, *v)
             }
         }
-        impl crate::core::CheckedMul for $t {
+        impl $crate::core::CheckedMul for $t {
             fn checked_mul(&self, v: &Self) -> Option<Self> {
                 <$t>::checked_mul(*self, *v)
             }
         }
-        impl crate::core::CheckedDiv for $t {
+        impl $crate::core::CheckedDiv for $t {
             fn checked_div(&self, v: &Self) -> Option<Self> {
                 <$t>::checked_div(*self, *v)
             }
         }
-        impl crate::core::CheckedRem for $t {
+        impl $crate::core::CheckedRem for $t {
             fn checked_rem(&self, v: &Self) -> Option<Self> {
                 <$t>::checked_rem(*self, *v)
             }

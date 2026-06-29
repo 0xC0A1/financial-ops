@@ -118,7 +118,7 @@ pub trait CheckedDecimalOperations {
         Self: Sized;
 }
 
-// Blanket implementation of the DecimalOps trait for all types implementing numeric operations
+// Blanket implementation of `CheckedDecimalOperations` for all types implementing checked arithmetic.
 impl<T> CheckedDecimalOperations for T
 where
     T: CheckedAdd + CheckedSub + CheckedMul + CheckedDiv + CheckedRem + From<u32>,
@@ -131,23 +131,22 @@ where
     ) -> Result<(Self, u32), DecimalOperationError> {
         if self_decimals > other_decimals {
             let factor = T::from(10u32.pow(self_decimals - other_decimals));
-            match self.checked_add(
-                &other
-                    .checked_mul(&factor)
-                    .ok_or(DecimalOperationError::Overflow)?,
-            ) {
-                Some(value) => Ok((value, self_decimals)),
-                None => Err(DecimalOperationError::Overflow),
-            }
+            let scaled = other
+                .checked_mul(&factor)
+                .ok_or(DecimalOperationError::Overflow)?;
+            let value = self
+                .checked_add(&scaled)
+                .ok_or(DecimalOperationError::Overflow)?;
+            Ok((value, self_decimals))
         } else {
             let factor = T::from(10u32.pow(other_decimals - self_decimals));
-            match self
+            let scaled = self
                 .checked_mul(&factor)
-                .and_then(|x| x.checked_add(&other))
-            {
-                Some(value) => Ok((value, other_decimals)),
-                None => Err(DecimalOperationError::Overflow),
-            }
+                .ok_or(DecimalOperationError::Overflow)?;
+            let value = scaled
+                .checked_add(&other)
+                .ok_or(DecimalOperationError::Overflow)?;
+            Ok((value, other_decimals))
         }
     }
 
@@ -159,23 +158,22 @@ where
     ) -> Result<(Self, u32), DecimalOperationError> {
         if self_decimals > other_decimals {
             let factor = T::from(10u32.pow(self_decimals - other_decimals));
-            match self.checked_sub(
-                &other
-                    .checked_mul(&factor)
-                    .ok_or(DecimalOperationError::Overflow)?,
-            ) {
-                Some(value) => Ok((value, self_decimals)),
-                None => Err(DecimalOperationError::Overflow),
-            }
+            let scaled = other
+                .checked_mul(&factor)
+                .ok_or(DecimalOperationError::Overflow)?;
+            let value = self
+                .checked_sub(&scaled)
+                .ok_or(DecimalOperationError::Overflow)?;
+            Ok((value, self_decimals))
         } else {
             let factor = T::from(10u32.pow(other_decimals - self_decimals));
-            match self
+            let scaled = self
                 .checked_mul(&factor)
-                .and_then(|x| x.checked_sub(&other))
-            {
-                Some(value) => Ok((value, other_decimals)),
-                None => Err(DecimalOperationError::Overflow),
-            }
+                .ok_or(DecimalOperationError::Overflow)?;
+            let value = scaled
+                .checked_sub(&other)
+                .ok_or(DecimalOperationError::Overflow)?;
+            Ok((value, other_decimals))
         }
     }
 
@@ -185,10 +183,10 @@ where
         self_decimals: u32,
         other_decimals: u32,
     ) -> Result<(Self, u32), DecimalOperationError> {
-        match self.checked_mul(&other) {
-            Some(value) => Ok((value, self_decimals + other_decimals)),
-            None => Err(DecimalOperationError::Overflow),
-        }
+        let value = self
+            .checked_mul(&other)
+            .ok_or(DecimalOperationError::Overflow)?;
+        Ok((value, self_decimals + other_decimals))
     }
 
     fn divide_decimals_checked(
@@ -201,10 +199,10 @@ where
         let adjusted_value = self
             .checked_mul(&factor)
             .ok_or(DecimalOperationError::Overflow)?;
-        match adjusted_value.checked_div(&other) {
-            Some(value) => Ok((value, self_decimals)),
-            None => Err(DecimalOperationError::DivisionByZero),
-        }
+        let value = adjusted_value
+            .checked_div(&other)
+            .ok_or(DecimalOperationError::DivisionByZero)?;
+        Ok((value, self_decimals))
     }
 
     fn rem_decimals_checked(
@@ -217,14 +215,16 @@ where
         let adjusted_value = self
             .checked_mul(&factor)
             .ok_or(DecimalOperationError::Overflow)?;
-        match adjusted_value.checked_rem(&other) {
-            Some(value) => Ok((value, self_decimals)),
-            None => Err(DecimalOperationError::DivisionByZero),
-        }
+        let value = adjusted_value
+            .checked_rem(&other)
+            .ok_or(DecimalOperationError::DivisionByZero)?;
+        Ok((value, self_decimals))
     }
 }
 
 #[cfg(test)]
+// Digits are grouped to reflect monetary notation (e.g. `123_45` = $123.45).
+#[allow(clippy::inconsistent_digit_grouping, clippy::zero_prefixed_literal)]
 mod tests {
     use super::*;
 

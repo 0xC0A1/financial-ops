@@ -1,0 +1,28 @@
+[package]
+name = "financial-ops-macros"
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Kevin Rodriguez <_@kevinrodriguez.io>"]
+description = "Procedural macros for `financial-ops`: recursive compile-time checked arithmetic."
+license = "MIT"
+repository = "https://github.com/0xC0A1/financial-ops"
+homepage = "https://github.com/0xC0A1/financial-ops"
+documentation = "https://docs.rs/financial-ops-macros"
+readme = "README.md"
+keywords = [
+    "macro",
+    "checked",
+    "arithmetic",
+    "financial",
+    "overflow",
+]
+categories = ["finance", "rust-patterns"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full"] }

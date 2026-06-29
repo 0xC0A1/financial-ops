@@ -83,7 +83,7 @@ pub trait DecimalOperations {
         Self: Sized;
 }
 
-// Blanket implementation of the DecimalOps trait for all types implementing numeric operations
+// Blanket implementation of `DecimalOperations` for all types implementing numeric operations.
 impl<T> DecimalOperations for T
 where
     T: Add<Output = T>
@@ -136,6 +136,8 @@ where
 }
 
 #[cfg(test)]
+// Digits are grouped to reflect monetary notation (e.g. `123_45` = $123.45).
+#[allow(clippy::inconsistent_digit_grouping, clippy::zero_prefixed_literal)]
 mod tests {
     use super::*;
 

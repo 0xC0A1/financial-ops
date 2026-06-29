@@ -4,7 +4,7 @@ use std::{
 };
 
 /// Represents the possible errors that can occur during decimal operations.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DecimalOperationError {
     /// Indicates that an overflow occurred during the operation.
     Overflow,

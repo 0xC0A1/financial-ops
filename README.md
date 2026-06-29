@@ -66,3 +66,58 @@ use financial_ops::DecimalOperations;
 - `mul_decimals`
 - `div_decimals`
 - `rem_decimals`
+
+## The `checked!` macro
+
+The `checked!` macro rewrites a normal arithmetic expression into a chain of
+checked operations, recursively, while respecting operator precedence and
+parentheses. Without an error it evaluates to an `Option`; with a trailing
+`@ <error>` it evaluates to a `Result`.
+
+```rust
+use financial_ops::checked;
+
+// Respects precedence: this is `a + (b * c)`, fully checked.
+let value: Option<u64> = checked! { 2u64 + 3 * 4 };
+assert_eq!(value, Some(14));
+
+// Overflow short-circuits to `None`.
+assert_eq!(checked! { u8::MAX + 1u8 }, None);
+
+// With `@ error`, you get a `Result` you can `?` on.
+let total = checked! { 2u64 + 2 @ "overflow" }?;
+assert_eq!(total, 4);
+```
+
+Supported operators: `+`, `-`, `*`, `/`, `%` (mapped to `checked_add`,
+`checked_sub`, `checked_mul`, `checked_div`, `checked_rem`). Each operand is
+evaluated exactly once, in left-to-right order.
+
+## Releasing
+
+Releases are automated with [release-plz](https://release-plz.dev) via the
+`Release-plz` GitHub Actions workflow (`.github/workflows/release-plz.yml`),
+driven by [Conventional Commits](https://www.conventionalcommits.org).
+
+**One-time setup:** add a [crates.io API token](https://crates.io/settings/tokens)
+as a repository secret named `CARGO_REGISTRY_TOKEN`
+(*Settings → Secrets and variables → Actions*).
+
+**The flow:**
+
+1. Land changes on `master` using conventional commit messages
+   (`feat: ...`, `fix: ...`, `feat!: ...` for breaking, etc.).
+2. release-plz opens/updates a **release PR** that bumps the crate versions and
+   updates the changelogs based on those commits.
+3. **Merge the release PR.** release-plz then publishes the changed crates to
+   crates.io in dependency order (`financial-ops-macros` before `financial-ops`)
+   and creates the git tags and GitHub releases.
+
+> Tip: PRs opened by the default `GITHUB_TOKEN` don't trigger other workflows
+> (so CI won't run on the release PR). To get CI on release PRs, create a
+> [GitHub App token](https://release-plz.dev/docs/github/token) or PAT and use
+> it for the `Release-plz` workflow.
+
+A manual fallback workflow (`.github/workflows/publish.yml`) is available from
+the Actions tab (*Run workflow*) for one-off publishes, including a `dry_run`
+option that runs `cargo publish --workspace --dry-run`.

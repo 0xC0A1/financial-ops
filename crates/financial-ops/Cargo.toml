@@ -1,12 +1,13 @@
 [package]
 name = "financial-ops"
-version = "0.1.0"
-edition = "2021"
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.85"
 authors = ["Kevin Rodriguez <_@kevinrodriguez.io>"]
 description = "A Rust library to perform decimal arithmetic without floating point values."
 license = "MIT"
-repository = "https://github.com/kevinrodriguez-io/financial-ops"
-homepage = "https://github.com/kevinrodriguez-io/financial-ops"
+repository = "https://github.com/0xC0A1/financial-ops"
+homepage = "https://github.com/0xC0A1/financial-ops"
 documentation = "https://docs.rs/financial-ops"
 readme = "README.md"
 keywords = [
@@ -19,3 +20,4 @@ keywords = [
 categories = ["finance", "cryptography"]
 
 [dependencies]
+financial-ops-macros = { version = "1.0.0", path = "../financial-ops-macros" }
