@@ -1,7 +1,6 @@
 name: Release-plz
 
 permissions:
-  pull-requests: write
   contents: write
 
 on:
@@ -10,9 +9,12 @@ on:
       - master
 
 jobs:
-  # Publishes any crate whose version in Cargo.toml is newer than the one on
-  # crates.io (i.e. right after a release PR is merged), in dependency order,
-  # then creates git tags and GitHub releases.
+  # On every push to master, publish any crate whose version in Cargo.toml is
+  # newer than the one on crates.io, in dependency order (financial-ops-macros
+  # before financial-ops), then create git tags and GitHub releases.
+  #
+  # Release flow: bump the crate versions + update CHANGELOG.md in a normal
+  # commit, push to master, and this job ships it.
   release-plz-release:
     name: Release-plz release
     runs-on: ubuntu-latest
@@ -28,30 +30,6 @@ jobs:
         uses: release-plz/action@v0.5
         with:
           command: release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-  # Opens/updates a "release PR" that bumps versions and updates the changelog
-  # based on the conventional commits since the last release.
-  release-plz-pr:
-    name: Release-plz PR
-    runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == '0xC0A1' }}
-    concurrency:
-      group: release-plz-${{ github.ref }}
-      cancel-in-progress: false
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-      - name: Run release-plz
-        uses: release-plz/action@v0.5
-        with:
-          command: release-pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

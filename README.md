@@ -95,9 +95,8 @@ evaluated exactly once, in left-to-right order.
 
 ## Releasing
 
-Releases are automated with [release-plz](https://release-plz.dev) via the
-`Release-plz` GitHub Actions workflow (`.github/workflows/release-plz.yml`),
-driven by [Conventional Commits](https://www.conventionalcommits.org).
+Releases happen automatically on every push to `master`, via the `Release-plz`
+GitHub Actions workflow (`.github/workflows/release-plz.yml`).
 
 **One-time setup:** add a [crates.io API token](https://crates.io/settings/tokens)
 as a repository secret named `CARGO_REGISTRY_TOKEN`
@@ -105,18 +104,15 @@ as a repository secret named `CARGO_REGISTRY_TOKEN`
 
 **The flow:**
 
-1. Land changes on `master` using conventional commit messages
-   (`feat: ...`, `fix: ...`, `feat!: ...` for breaking, etc.).
-2. release-plz opens/updates a **release PR** that bumps the crate versions and
-   updates the changelogs based on those commits.
-3. **Merge the release PR.** release-plz then publishes the changed crates to
-   crates.io in dependency order (`financial-ops-macros` before `financial-ops`)
-   and creates the git tags and GitHub releases.
+1. Bump the `version` of the crate(s) you're releasing (keep them in sync, and
+   update the `financial-ops-macros` dependency version in
+   `crates/financial-ops/Cargo.toml` if it changed). Update `CHANGELOG.md`.
+2. Commit and push to `master`.
 
-> Tip: PRs opened by the default `GITHUB_TOKEN` don't trigger other workflows
-> (so CI won't run on the release PR). To get CI on release PRs, create a
-> [GitHub App token](https://release-plz.dev/docs/github/token) or PAT and use
-> it for the `Release-plz` workflow.
+The workflow runs [release-plz](https://release-plz.dev), which publishes any
+crate whose `Cargo.toml` version is newer than the one on crates.io — in
+dependency order (`financial-ops-macros` before `financial-ops`) — and creates
+the git tags and GitHub releases. If no version changed, nothing is published.
 
 A manual fallback workflow (`.github/workflows/publish.yml`) is available from
 the Actions tab (*Run workflow*) for one-off publishes, including a `dry_run`
