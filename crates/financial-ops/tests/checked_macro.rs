@@ -93,3 +93,14 @@ fn result_form_with_question_mark() -> Result<(), DecimalOperationError> {
     assert_eq!(total, 5_000);
     Ok(())
 }
+
+#[test]
+fn result_form_with_string_error() {
+    // `@ <expr>` accepts any error value; a string literal yields `&str` as the
+    // error type, with no external crate (e.g. anyhow) required.
+    let ok: Result<u64, &str> = checked! { 2u64 + 2 @ "overflow" };
+    assert_eq!(ok, Ok(4));
+
+    let err: Result<u8, &str> = checked! { u8::MAX + 1u8 @ "overflow" };
+    assert_eq!(err, Err("overflow"));
+}

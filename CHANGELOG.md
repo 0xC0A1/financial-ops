@@ -14,6 +14,22 @@ entries below were written by hand.
 ### Fixes
 ### Breaking
 
+## [1.1.0] - 2026-06-30
+### Features
+- Added custom-error variants to `CheckedDecimalOperations`:
+  `add_decimals_checked_or`, `sub_decimals_checked_or`,
+  `multiply_decimals_checked_or`, `divide_decimals_checked_or`, and
+  `rem_decimals_checked_or`. These let you choose the error type (any value,
+  e.g. your own enum or a `&str`) without any external dependency, mirroring the
+  `@ <error>` syntax of the `checked!` macro.
+
+### Fixes
+- Clarified in the docs that the `checked!` macro's `@ <error>` accepts any
+  expression: the error type is whatever you pass (a `&str` works), so no crate
+  like `anyhow` is needed.
+
+### Breaking
+
 ## [1.0.0] - 2026-06-29
 ### Features
 - Added the `checked!` macro (new `financial-ops-macros` crate, re-exported as

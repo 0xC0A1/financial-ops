@@ -52,6 +52,30 @@ use financial_ops::CheckedDecimalOperations;
 - `div_decimals_checked`
 - `rem_decimals_checked`
 
+Each of these has an `_or` variant that lets you choose the error type (any
+value — your own enum, or even a `&str` — no external crate required), mirroring
+the `@` syntax of the [`checked!` macro](#the-checked-macro):
+
+```rust
+use financial_ops::CheckedDecimalOperations;
+
+#[derive(Debug, PartialEq)]
+enum MyError { Math }
+
+let result = u32::MAX.add_decimals_checked_or(1, 0, 0, MyError::Math);
+assert_eq!(result, Err(MyError::Math));
+
+// The error can also just be a string:
+let r: Result<(u64, u32), &str> = 10u64.divide_decimals_checked_or(0, 2, 2, "division by zero");
+assert_eq!(r, Err("division by zero"));
+```
+
+- `add_decimals_checked_or`
+- `sub_decimals_checked_or`
+- `multiply_decimals_checked_or`
+- `divide_decimals_checked_or`
+- `rem_decimals_checked_or`
+
 ### Unchecked
 
 This set of operations will return the result and the number of decimals, without any checks,
@@ -84,10 +108,19 @@ assert_eq!(value, Some(14));
 // Overflow short-circuits to `None`.
 assert_eq!(checked! { u8::MAX + 1u8 }, None);
 
-// With `@ error`, you get a `Result` you can `?` on.
-let total = checked! { 2u64 + 2 @ "overflow" }?;
-assert_eq!(total, 4);
+// With `@ <error>` you get a `Result<T, E>`, where `E` is simply the type of
+// the expression you pass. A string literal makes `E = &str` — no `anyhow`,
+// no external crate, no trait bounds.
+let ok: Result<u64, &str> = checked! { 2u64 + 2 @ "overflow" };
+assert_eq!(ok, Ok(4));
+
+let err: Result<u8, &str> = checked! { u8::MAX + 1u8 @ "overflow" };
+assert_eq!(err, Err("overflow"));
 ```
+
+Because `@ <error>` expands to `.ok_or(<error>)`, the error can be anything: a
+`&str`, your own enum variant, etc. To use `?` on the result, the surrounding
+function's error type just needs to be the same type (or `From` it).
 
 Supported operators: `+`, `-`, `*`, `/`, `%` (mapped to `checked_add`,
 `checked_sub`, `checked_mul`, `checked_div`, `checked_rem`). Each operand is

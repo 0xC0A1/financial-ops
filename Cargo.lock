@@ -4,14 +4,14 @@ version = 4
 
 [[package]]
 name = "financial-ops"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "financial-ops-macros",
 ]
 
 [[package]]
 name = "financial-ops-macros"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -19,7 +19,9 @@ assert_eq!(value, Some(14));
 // Overflow short-circuits to `None`.
 assert_eq!(checked! { u8::MAX + 1u8 }, None);
 
-// With `@ error`, you get a `Result` instead.
-let result = checked! { 2u64 + 2 @ "overflow" };
+// With `@ <error>` you get a `Result<T, E>`, where `E` is just the type of the
+// expression you pass — a string literal makes `E = &str`, no external crate
+// (e.g. anyhow) required.
+let result: Result<u64, &str> = checked! { 2u64 + 2 @ "overflow" };
 assert_eq!(result, Ok(4));
 ```

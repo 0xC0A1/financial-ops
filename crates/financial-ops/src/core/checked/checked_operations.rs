@@ -116,6 +116,87 @@ pub trait CheckedDecimalOperations {
     ) -> Result<(Self, u32), DecimalOperationError>
     where
         Self: Sized;
+
+    /// Like [`add_decimals_checked`](Self::add_decimals_checked), but maps any
+    /// failure to the caller-provided `error`, so you choose the error type
+    /// (e.g. your own enum, or even a `&str`). No external crate required.
+    fn add_decimals_checked_or<E>(
+        self,
+        other: Self,
+        self_decimals: u32,
+        other_decimals: u32,
+        error: E,
+    ) -> Result<(Self, u32), E>
+    where
+        Self: Sized,
+    {
+        self.add_decimals_checked(other, self_decimals, other_decimals)
+            .map_err(|_| error)
+    }
+
+    /// Like [`sub_decimals_checked`](Self::sub_decimals_checked), but maps any
+    /// failure to the caller-provided `error`.
+    fn sub_decimals_checked_or<E>(
+        self,
+        other: Self,
+        self_decimals: u32,
+        other_decimals: u32,
+        error: E,
+    ) -> Result<(Self, u32), E>
+    where
+        Self: Sized,
+    {
+        self.sub_decimals_checked(other, self_decimals, other_decimals)
+            .map_err(|_| error)
+    }
+
+    /// Like [`multiply_decimals_checked`](Self::multiply_decimals_checked), but
+    /// maps any failure to the caller-provided `error`.
+    fn multiply_decimals_checked_or<E>(
+        self,
+        other: Self,
+        self_decimals: u32,
+        other_decimals: u32,
+        error: E,
+    ) -> Result<(Self, u32), E>
+    where
+        Self: Sized,
+    {
+        self.multiply_decimals_checked(other, self_decimals, other_decimals)
+            .map_err(|_| error)
+    }
+
+    /// Like [`divide_decimals_checked`](Self::divide_decimals_checked), but maps
+    /// any failure (overflow or division by zero) to the caller-provided `error`.
+    fn divide_decimals_checked_or<E>(
+        self,
+        other: Self,
+        self_decimals: u32,
+        other_decimals: u32,
+        error: E,
+    ) -> Result<(Self, u32), E>
+    where
+        Self: Sized,
+    {
+        self.divide_decimals_checked(other, self_decimals, other_decimals)
+            .map_err(|_| error)
+    }
+
+    /// Like [`rem_decimals_checked`](Self::rem_decimals_checked), but maps any
+    /// failure (overflow or division by zero) to the caller-provided `error`.
+    fn rem_decimals_checked_or<E>(
+        self,
+        other: Self,
+        self_decimals: u32,
+        other_decimals: u32,
+        error: E,
+    ) -> Result<(Self, u32), E>
+    where
+        Self: Sized,
+    {
+        self.rem_decimals_checked(other, self_decimals, other_decimals)
+            .map_err(|_| error)
+    }
 }
 
 // Blanket implementation of `CheckedDecimalOperations` for all types implementing checked arithmetic.
@@ -341,5 +422,29 @@ mod tests {
         assert_eq!(decimals, 2);
 
         Ok(())
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    enum MyError {
+        Math,
+    }
+
+    #[test]
+    fn test_checked_or_custom_enum_error() {
+        // Overflow maps to the caller's error type.
+        let result = u32::MAX.add_decimals_checked_or(1, 0, 0, MyError::Math);
+        assert_eq!(result, Err(MyError::Math));
+
+        // Success carries the value through with the chosen error type.
+        let ok: Result<(u64, u32), MyError> = 2u64.add_decimals_checked_or(3, 0, 0, MyError::Math);
+        assert_eq!(ok, Ok((5, 0)));
+    }
+
+    #[test]
+    fn test_checked_or_string_error() {
+        // The error can be a plain &str — no external crate needed.
+        let result: Result<(u64, u32), &str> =
+            10u64.divide_decimals_checked_or(0, 2, 2, "division by zero");
+        assert_eq!(result, Err("division by zero"));
     }
 }
