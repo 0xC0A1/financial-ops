@@ -45,7 +45,7 @@ entries below were written by hand.
 
 ### Fixes
 - Made checked operation error handling consistent and more idiomatic.
-- Updated repository and homepage links to the new GitHub organization (`0xC0A1`).
+- Updated repository and homepage links to the GitHub account (`kevinrodriguez-io`).
 
 ### Breaking
 - Migrated to the Rust 2024 edition and raised the minimum supported Rust
