@@ -18,7 +18,6 @@ jobs:
   release-plz-release:
     name: Release-plz release
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == '0xC0A1' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
